@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import org.springframework.data.neo4j.integration.shared.common.DtoPersonProjection;
 import org.springframework.data.neo4j.integration.shared.common.EntitiesWithDynamicLabels;
+import org.springframework.data.neo4j.integration.movies.Partner;
 import org.springframework.data.neo4j.integration.shared.common.SimplePerson;
 import org.springframework.data.neo4j.integration.shared.common.ThingWithFixedGeneratedId;
 import reactor.core.publisher.Flux;
@@ -2421,6 +2422,15 @@ class ReactiveRepositoryIT {
 		}
 	}
 
+	@Nested
+	class Issues extends ReactiveIntegrationTestBase {
+
+		@Test
+		void ghIrgendwas(@Autowired PartnerRepository partnerRepository) {
+
+		}
+	}
+
 	interface BidirectionalStartRepository extends ReactiveNeo4jRepository<BidirectionalStart, Long> {}
 
 	interface BidirectionalEndRepository extends ReactiveNeo4jRepository<BidirectionalEnd, Long> {}
@@ -2486,6 +2496,14 @@ class ReactiveRepositoryIT {
 
 	interface EntityWithCustomIdAndDynamicLabelsRepository
 			extends ReactiveNeo4jRepository<EntitiesWithDynamicLabels.EntityWithCustomIdAndDynamicLabels, String> {}
+
+	interface PartnerRepository extends ReactiveNeo4jRepository<Partner, Long> {
+
+		@Query("MATCH p=(partner:Partner {code: $partnerCode})-[:CHILD_ORGANISATIONS*0..4]->(org:Organisation) " +
+			   "RETURN partner, relationships(p), nodes(p)")
+		Mono<Partner> treeWithOrganisation(@Param("partnerCode") final String partnerCode);
+	}
+
 
 	@SpringJUnitConfig(ReactiveRepositoryIT.Config.class)
 	static abstract class ReactiveIntegrationTestBase {
